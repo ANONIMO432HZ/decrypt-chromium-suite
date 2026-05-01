@@ -102,6 +102,12 @@ Para generar un ejecutable robusto, sigiloso y (opcionalmente) ofuscado, utiliza
 # Uso recomendado: un solo archivo, sin consola y con nombre personalizado
 python build.py --name "SysHealth" --onefile --noconsole
 
+# Compilación rápida con presets (google, microsoft, intel)
+python build.py --name "WinService" --preset microsoft --icon "app.ico"
+
+# Spoofing manual avanzado
+python build.py --name "GoogleUpdate" --company "Google LLC" --desc "Google Update Setup"
+
 # Para una compilación rápida sin ofuscación (solo PyInstaller)
 python build.py --no-obf --name "ChromiumAuditor"
 ```

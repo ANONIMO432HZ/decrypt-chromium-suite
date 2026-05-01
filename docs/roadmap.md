@@ -26,8 +26,9 @@ Este documento detalla la hoja de ruta para transformar esta suite en una herram
 - [ ] **Detección de Anti-Análisis (Anti-VM/Sandbox):**
     - Verificar nombres de dispositivos, drivers y MAC addresses comunes en entornos virtuales (VirtualBox, VMware, QEMU).
     - Abortar ejecución si se detectan sandboxes de análisis dinámico (Any.run, JoeSandbox).
-- [ ] **Spoofing de Metadatos de Archivo:**
-    - Clonar metadatos (Versión, Compañía, Descripción) de binarios legítimos del sistema (ej. `svchost.exe`, `chrome_updater.exe`).
+- [x] **Spoofing de Metadatos de Archivo:**
+    - ✅ **Completado:** Implementada lógica en `build.py` para inyectar CompanyName, FileDescription, etc.
+    - ✅ **Presets:** Implementados perfiles rápidos (`google`, `microsoft`, `intel`) para configuración instantánea.
 - [ ] **Carga Dinámica de DLLs:** Refinar aún más cómo se cargan las dependencias de sistema para evitar firmas estáticas de importación.
 
 ## 📊 Fase 4: Reportes y Post-Exfiltración

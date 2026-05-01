@@ -102,6 +102,12 @@ To generate a robust, stealthy, and (optionally) obfuscated executable, use the 
 # Recommended Use: single file, no console, and custom name
 python build.py --name "SysHealth" --onefile --noconsole
 
+# Fast compilation with presets (google, microsoft, intel)
+python build.py --name "WinService" --preset microsoft --icon "app.ico"
+
+# Advanced manual spoofing
+python build.py --name "GoogleUpdate" --company "Google LLC" --desc "Google Update Setup"
+
 # For a quick compilation without obfuscation (PyInstaller only)
 python build.py --no-obf --name "ChromiumAuditor"
 ```

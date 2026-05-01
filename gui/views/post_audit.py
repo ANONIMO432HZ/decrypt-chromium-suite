@@ -196,9 +196,20 @@ class PostAuditView(ctk.CTkFrame):
         self._dc_status.configure(text="  sin probar  ", fg_color=COLORS["bg_card"], text_color=COLORS["text_muted"])
 
     def _clear_log_box(self):
+        """Clears the log textbox and truncates the physical log file."""
         self._log.configure(state="normal")
         self._log.delete("0.0", "end")
         self._log.configure(state="disabled")
+
+        # Also truncate the audit log file if it exists
+        from pathlib import Path
+        audit_log = Path(".audit/pentest_audit.log")
+        if audit_log.exists():
+            try:
+                audit_log.write_text("", encoding="utf-8")
+                self._log_line("OK", "Archivo de log físico (.audit/pentest_audit.log) vaciado.")
+            except Exception as e:
+                self._log_line("ERR", f"No se pudo vaciar el archivo de log: {e}")
 
     # ── Exfiltration actions ──────────────────────────────────────────────────
 

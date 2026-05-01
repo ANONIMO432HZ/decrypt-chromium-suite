@@ -178,58 +178,81 @@ Ejemplos de uso:
         
         run_command(pyi_cmd, f"Compilando con PyInstaller (Carpeta: {args.dist_dir})")
         os.unlink(v_file)
-        print("\n[!] Vanilla build finished.")
-        return
+        # Proceder al final para cleanup
 
-    # 1. Detect PyArmor version
-    print("[*] Detecting PyArmor version...")
-    success, version_out = run_command([python, "-m", "pyarmor.cli", "--version"], "Checking PyArmor CLI")
-    
-    if success:
-        print("[+] PyArmor 8+ detectado.")
-        onefile = not args.multi_file
-        windowed = not args.show_console
-
-        pyi_opts = []
-        if onefile: pyi_opts.append("--onefile")
-        if windowed: pyi_opts.append("--windowed")
-        if args.uac_admin: pyi_opts.append("--uac-admin")
-        if args.clean: pyi_opts.append("--clean")
-        v_file = create_version_file(args)
-        pyi_opts.append(f"--version-file={v_file}")
-        pyi_opts.append("--hidden-import=win32crypt")
-        pyi_opts.append("--hidden-import=Cryptodome")
-        if args.icon and os.path.exists(args.icon): pyi_opts.append(f"--icon={args.icon}")
-        pyi_opts.append(f"--name {args.name}")
-        pyi_opts.append(f"--distpath {args.dist_dir}")
-        
-        opts_str = " ".join(pyi_opts)
-        run_command([python, "-m", "pyarmor.cli", "cfg", f"pack:pyi_options={opts_str}"], "Configurando PyArmor 9")
-        
-        # Build
-        pack_mode = "onefile" if onefile else "onedir"
-        run_command([python, "-m", "pyarmor.cli", "gen", "--output", f"{args.dist_dir}/obfuscated", "--pack", pack_mode, args.input], "Compilando con PyArmor 9")
-        os.unlink(v_file)
     else:
-        # Try legacy pyarmor
-        print("[!] PyArmor 8+ CLI no encontrado. Probando modo Legacy...")
-        success, version_out = run_command([python, "-m", "pyarmor", "--version"], "Verificando PyArmor Legacy")
+        # 1. Detect PyArmor version
+        print("[*] Detecting PyArmor version...")
+        success, version_out = run_command([python, "-m", "pyarmor.cli", "--version"], "Checking PyArmor CLI")
+        
         if success:
-            print("[+] PyArmor 7.x detectado.")
+            print("[+] PyArmor 8+ detectado.")
             onefile = not args.multi_file
             windowed = not args.show_console
-
+    
             pyi_opts = []
             if onefile: pyi_opts.append("--onefile")
             if windowed: pyi_opts.append("--windowed")
+            if args.uac_admin: pyi_opts.append("--uac-admin")
+            if args.clean: pyi_opts.append("--clean")
+            v_file = create_version_file(args)
+            pyi_opts.append(f"--version-file={v_file}")
+            pyi_opts.append("--hidden-import=win32crypt")
+            pyi_opts.append("--hidden-import=Cryptodome")
+            if args.icon and os.path.exists(args.icon): pyi_opts.append(f"--icon={args.icon}")
             pyi_opts.append(f"--name {args.name}")
+            pyi_opts.append(f"--distpath {args.dist_dir}")
             
             opts_str = " ".join(pyi_opts)
-            run_command([python, "-m", "pyarmor", "pack", "-e", opts_str, args.input], "Compilando con PyArmor Legacy")
+            run_command([python, "-m", "pyarmor.cli", "cfg", f"pack:pyi_options={opts_str}"], "Configurando PyArmor 9")
+            
+            # Build
+            pack_mode = "onefile" if onefile else "onedir"
+            run_command([python, "-m", "pyarmor.cli", "gen", "--output", f"{args.dist_dir}/obfuscated", "--pack", pack_mode, args.input], "Compilando con PyArmor 9")
+            os.unlink(v_file)
         else:
-            print("[-] FATAL: PyArmor not found in environment. Please run: pip install pyarmor")
+            # Try legacy pyarmor
+            print("[!] PyArmor 8+ CLI no encontrado. Probando modo Legacy...")
+            success, version_out = run_command([python, "-m", "pyarmor", "--version"], "Verificando PyArmor Legacy")
+            if success:
+                print("[+] PyArmor 7.x detectado.")
+                onefile = not args.multi_file
+                windowed = not args.show_console
+    
+                pyi_opts = []
+                if onefile: pyi_opts.append("--onefile")
+                if windowed: pyi_opts.append("--windowed")
+                pyi_opts.append(f"--name {args.name}")
+                
+                opts_str = " ".join(pyi_opts)
+                run_command([python, "-m", "pyarmor", "pack", "-e", opts_str, args.input], "Compilando con PyArmor Legacy")
+            else:
+                print("[-] FATAL: PyArmor not found in environment. Please run: pip install pyarmor")
 
-    print("\n[!] Process finished. Check 'dist/' folder for results.")
+    print("\n[!] Proceso finalizado. Revisá la carpeta 'dist/' para ver los resultados.")
+    cleanup_artifacts(args)
+
+def cleanup_artifacts(args):
+    """Limpia archivos temporales y artefactos de compilación."""
+    print("\n[*] Limpiando artefactos de compilación...")
+    
+    # 1. El archivo .spec se genera con el nombre del ejecutable
+    spec_file = f"{args.name}.spec"
+    if os.path.exists(spec_file):
+        try:
+            os.unlink(spec_file)
+            print(f"  [+] Archivo especificación eliminado: {spec_file}")
+        except Exception as e:
+            print(f"  [!] No se pudo eliminar {spec_file}: {e}")
+
+    # 2. Si se solicitó limpieza, borramos la carpeta build/ que deja PyInstaller
+    if args.clean and os.path.exists("build"):
+        import shutil
+        try:
+            shutil.rmtree("build")
+            print("  [+] Carpeta temporal 'build/' eliminada.")
+        except Exception as e:
+            print(f"  [!] No se pudo eliminar carpeta 'build/': {e}")
 
 if __name__ == "__main__":
     main()

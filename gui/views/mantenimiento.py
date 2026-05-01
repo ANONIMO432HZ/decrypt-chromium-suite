@@ -121,6 +121,7 @@ class MantenimientoView(ctk.CTkFrame):
         btn_row.pack(fill="x", pady=(PAD["sm"], 0))
         make_button(btn_row, "🔄 Actualizar", command=self._refresh_dir_stats, style="secondary", width=120).pack(side="left", padx=(0, PAD["sm"]))
         make_button(btn_row, "🗑 Limpiar audits", command=self._clean_audits, style="danger", width=140).pack(side="left", padx=(0, PAD["sm"]))
+        make_button(btn_row, "🧹 Limpiar sistema", command=self._clean_system, style="danger", width=140).pack(side="left", padx=(0, PAD["sm"]))
         make_button(btn_row, "📂 Abrir carpeta", command=self._open_dir, style="secondary", width=130).pack(side="left")
 
         # ── Log viewer ────────────────────────────────────────────────────────
@@ -244,15 +245,51 @@ class MantenimientoView(ctk.CTkFrame):
         self._dir_count_badge.configure(text=f"  {len(files)} archivos  ")
 
     def _clean_audits(self):
+        """Borra todos los archivos de reporte en el directorio de auditoría."""
         d = self._audit_dir or Path(".audit")
         if not d.exists():
             return
-        for f in d.glob("audit_report_*"):
-            try:
-                f.unlink(missing_ok=True)
-            except Exception:
-                pass
+        
+        # Iterar sobre todos los archivos para una limpieza profunda
+        for f in d.iterdir():
+            if f.is_file():
+                try:
+                    f.unlink(missing_ok=True)
+                except Exception:
+                    pass
+        
         self._refresh_dir_stats()
+
+    def _clean_system(self):
+        """Limpieza profunda de archivos temporales del sistema y compilación."""
+        import shutil, os
+        from tkinter import messagebox
+        
+        if not messagebox.askyesno("Limpiar Sistema", "¿Estás seguro de eliminar todos los archivos temporales (__pycache__, temp, spec, etc)?"):
+            return
+
+        # 1. Carpetas temporales conocidas
+        targets = ["build", "tmp", "temp", ".pytest_cache", ".pyarmor"]
+        for t in targets:
+            p = Path(t)
+            if p.exists() and p.is_dir():
+                try:
+                    shutil.rmtree(p)
+                except: pass
+
+        # 2. Archivos .spec en la raíz
+        for f in Path(".").glob("*.spec"):
+            try: f.unlink()
+            except: pass
+
+        # 3. __pycache__ recursivo
+        for p in Path(".").rglob("__pycache__"):
+            if p.is_dir():
+                try: shutil.rmtree(p)
+                except: pass
+
+        self._refresh_dir_stats()
+        messagebox.showinfo("Limpieza Completada", "Se han eliminado los archivos temporales del sistema.")
 
     def _open_dir(self):
         import os

@@ -362,16 +362,30 @@ class BuilderView(ctk.CTkScrollableFrame):
         self._log.configure(state="disabled")
 
     def _clear_logs(self):
-        """Clears the build log textbox."""
+        """Clears the build log textbox and the physical audit log file."""
         self._log.configure(state="normal")
         self._log.delete("0.0", "end")
         self._log.configure(state="disabled")
-        self._log_line("INFO", "Log de compilación limpiado.")
+        
+        # Also truncate the audit log file if it exists
+        audit_log = Path(".audit/pentest_audit.log")
+        if audit_log.exists():
+            try:
+                audit_log.write_text("", encoding="utf-8")
+                self._log_line("OK", "Archivo de log físico (.audit/pentest_audit.log) vaciado.")
+            except Exception as e:
+                self._log_line("ERR", f"No se pudo vaciar el archivo de log: {e}")
+        
+        self._log_line("INFO", "Log de visualización limpiado.")
 
     def _delete_builds(self):
-        """Cleans the dist folder."""
-        import shutil
+        """Cleans dist, build, tmp folders and root .spec files."""
+        import shutil, os
         dist = Path(self._dist_var.get() or "dist")
+        build_dir = Path("build")
+        tmp_dir = Path("tmp")
+        
+        # 1. Clean dist
         if dist.exists() and dist.is_dir():
             try:
                 shutil.rmtree(dist)
@@ -379,8 +393,36 @@ class BuilderView(ctk.CTkScrollableFrame):
                 self._log_line("OK", f"Carpeta {dist}/ limpiada correctamente.")
             except Exception as e:
                 self._log_line("ERR", f"Error al limpiar {dist}: {e}")
-        else:
-            self._log_line("INFO", f"La carpeta {dist}/ no existe o ya está limpia.")
+        
+        # 2. Clean build
+        if build_dir.exists() and build_dir.is_dir():
+            try:
+                shutil.rmtree(build_dir)
+                self._log_line("OK", "Carpeta temporal 'build/' eliminada.")
+            except Exception as e:
+                self._log_line("ERR", f"Error al eliminar 'build/': {e}")
+
+        # 3. Clean tmp folder
+        if tmp_dir.exists() and tmp_dir.is_dir():
+            try:
+                shutil.rmtree(tmp_dir)
+                self._log_line("OK", "Carpeta 'tmp/' eliminada.")
+            except Exception as e:
+                self._log_line("ERR", f"Error al eliminar 'tmp/': {e}")
+        
+        # 4. Clean root .spec files
+        root = Path(".")
+        spec_files = list(root.glob("*.spec"))
+        if spec_files:
+            for f in spec_files:
+                try:
+                    f.unlink()
+                    self._log_line("OK", f"Archivo eliminado: {f.name}")
+                except Exception as e:
+                    self._log_line("ERR", f"No se pudo eliminar {f.name}: {e}")
+        
+        if not dist.exists() and not build_dir.exists() and not tmp_dir.exists() and not spec_files:
+            self._log_line("INFO", "Las carpetas y archivos de compilación ya están limpios.")
 
     # ── Build logic ───────────────────────────────────────────────────────────
 

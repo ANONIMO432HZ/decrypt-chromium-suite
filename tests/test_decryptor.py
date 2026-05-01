@@ -48,3 +48,20 @@ def test_decrypt_empty_blob():
     decryptor = ChromiumDecryptor()
     assert decryptor.decrypt(None, b"key") == ""
     assert decryptor.decrypt(b"ab", b"key") == "[Error: Dato muy corto]"
+
+def test_decrypt_legacy_dpapi_fallback(mocker):
+    """Test that it falls back to DPAPI if AES-GCM fails."""
+    decryptor = ChromiumDecryptor()
+    
+    # Mock AES.new to raise an exception (simulating failure)
+    mocker.patch("Cryptodome.Cipher.AES.new", side_effect=Exception("AES failed"))
+    
+    # Mock win32crypt.CryptUnprotectData for fallback
+    mocker.patch("win32crypt.CryptUnprotectData", return_value=(None, b"dpapi_decrypted"))
+    
+    key = b"fake_key_32_bytes"
+    fake_blob = b"v10" + b"A" * 12 + b"encrypted" + b"B" * 16
+    
+    result = decryptor.decrypt(fake_blob, key)
+    
+    assert result == "dpapi_decrypted"

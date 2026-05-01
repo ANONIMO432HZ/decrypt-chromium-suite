@@ -102,7 +102,9 @@ HTML_TEMPLATE = """
         .container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
         h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; word-break: break-all; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th:nth-child(1), td:nth-child(1), th:nth-child(2), td:nth-child(2) { white-space: nowrap; width: 1%; }
+        td:nth-child(3), td:nth-child(4), td:nth-child(5) { word-break: break-all; }
         th { background-color: #3498db; color: white; }
         tr:hover { background-color: #f1f1f1; }
         .browser-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold; }

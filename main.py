@@ -132,6 +132,9 @@ HTML_TEMPLATE = """
                 {{rows}}
             </tbody>
         </table>
+        
+        {{filtered_section}}
+
         <div class="footer">
             Suite de Auditoría Profesional - Uso bajo responsabilidad ética
             <span class="skipped">{{skipped_note}}</span>
@@ -267,8 +270,9 @@ class ChromiumDecryptor:
             return f"[Error: {err_type}]"
 
     def audit(self, fmt="html", out="audit_report"):
-        data    = []
-        skipped = 0
+        data          = []
+        filtered_data = []
+        skipped       = 0
 
         for name, path in self.browsers.items():
             if not path.exists():
@@ -303,6 +307,7 @@ class ChromiumDecryptor:
                         if not (row[0] and row[1] and row[2]):
                             continue
                         if not row[0].startswith(VALID_URL_PREFIXES):
+                            filtered_data.append([name, p.name, row[0], row[1], self.decrypt(row[2], key)])
                             skipped += 1
                             continue
                         data.append([name, p.name, row[0], row[1], self.decrypt(row[2], key)])
@@ -344,13 +349,43 @@ class ChromiumDecryptor:
                     f"<td>{html.escape(r[1])}</td><td>{html.escape(r[2])}</td>"
                     f"<td>{html.escape(r[3])}</td><td>{html.escape(r[4])}</td></tr>"
                 )
+            # Generar sección de filtrados
+            filtered_section = ""
+            if filtered_data:
+                filtered_rows = ""
+                for r in filtered_data:
+                    badge_class = r[0].lower().replace(' ', '-')
+                    filtered_rows += (
+                        f"<tr><td><span class='browser-badge {badge_class}'>{html.escape(r[0])}</span></td>"
+                        f"<td>{html.escape(r[1])}</td><td>{html.escape(r[2])}</td>"
+                        f"<td>{html.escape(r[3])}</td><td>{html.escape(r[4])}</td></tr>"
+                    )
+                filtered_section = f"""
+                <h2 style="margin-top: 40px; color: #e67e22; border-bottom: 2px solid #e67e22; padding-bottom: 10px;">Entradas Filtradas (No-HTTP/Otros)</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Navegador</th>
+                            <th>Perfil</th>
+                            <th>URL / Protocolo</th>
+                            <th>Usuario</th>
+                            <th>Contraseña</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filtered_rows}
+                    </tbody>
+                </table>
+                """
+
             # total y date se reemplazan ANTES que rows para evitar colisión con datos de usuario
             html_out = (HTML_TEMPLATE
                         .replace("{{total}}", str(len(data)))
                         .replace("{{date}}", stamp[:4] + "-" + stamp[4:6] + "-" + stamp[6:8]
                                  + " " + stamp[9:11] + ":" + stamp[11:13])
                         .replace("{{skipped_note}}", skipped_note)
-                        .replace("{{rows}}", rows_html))
+                        .replace("{{rows}}", rows_html)
+                        .replace("{{filtered_section}}", filtered_section))
             with open(final_out, "w", encoding='utf-8') as f:
                 f.write(html_out)
 

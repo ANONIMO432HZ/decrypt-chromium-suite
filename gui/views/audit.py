@@ -142,32 +142,33 @@ class AuditView(ctk.CTkFrame):
         self._status_badge.pack(side="right", padx=PAD["sm"])
 
         # ── Log output ────────────────────────────────────────────────────────
-        make_section_header(self, "Log de Ejecución", "📋")
+        make_section_header(self, "Consola de Ejecución en Tiempo Real", "📟")
         log_card = make_card(self)
         log_card.pack(fill="both", expand=True, padx=PAD["lg"], pady=(0, PAD["lg"]))
 
         self._log = ctk.CTkTextbox(
             log_card,
-            fg_color=COLORS["bg_input"],
-            text_color=COLORS["text_primary"],
+            fg_color=COLORS["bg_terminal"],
+            text_color=COLORS["text_terminal"],
             font=FONTS["code"],
             corner_radius=8,
-            border_width=0,
+            border_width=1,
+            border_color=COLORS["border"],
             wrap="word",
             state="disabled",
         )
-        self._log.pack(fill="both", expand=True, padx=PAD["sm"], pady=PAD["sm"])
+        self._log.pack(fill="both", expand=True, padx=PAD["xs"], pady=PAD["xs"])
 
         # Tag colours
-        self._log._textbox.tag_configure("INFO",    foreground=COLORS["text_primary"])
+        self._log._textbox.tag_configure("INFO",    foreground=COLORS["info"])
         self._log._textbox.tag_configure("OK",      foreground=COLORS["success"])
         self._log._textbox.tag_configure("WARN",    foreground=COLORS["warning"])
         self._log._textbox.tag_configure("ERR",     foreground=COLORS["danger"])
-        self._log._textbox.tag_configure("ACCENT",  foreground=COLORS["accent"])
-        self._log._textbox.tag_configure("MUTED",   foreground=COLORS["text_muted"])
+        self._log._textbox.tag_configure("SYSTEM",  foreground=COLORS["accent"])
+        self._log._textbox.tag_configure("TIMESTAMP", foreground=COLORS["text_muted"])
 
-        self._log_line("INFO", "  Chromium Auditor Dashboard — listo para operar\n")
-        self._log_line("MUTED", "  Configure los parámetros y presione 'Iniciar Auditoría'.\n")
+        self._log_line("SYSTEM", "  Chromium Auditor Dashboard — listo para operar\n")
+        self._log_line("TIMESTAMP", "  Configure los parámetros y presione 'Iniciar Auditoría'.\n")
 
     # ── Stat helpers ──────────────────────────────────────────────────────────
 
@@ -187,9 +188,10 @@ class AuditView(ctk.CTkFrame):
     # ── Log helpers ───────────────────────────────────────────────────────────
 
     def _log_line(self, tag: str, msg: str):
+        from datetime import datetime
         ts = datetime.now().strftime("%H:%M:%S")
         self._log.configure(state="normal")
-        self._log._textbox.insert("end", f"[{ts}] ", "MUTED")
+        self._log._textbox.insert("end", f"[{ts}] ", "TIMESTAMP")
         self._log._textbox.insert("end", msg + "\n", tag)
         self._log._textbox.see("end")
         self._log.configure(state="disabled")
@@ -283,6 +285,7 @@ class AuditView(ctk.CTkFrame):
                 skip_html=self._skip_html_var.get(),
                 skip_csv=self._skip_csv_var.get(),
                 browser_filter=browser_filter,
+                callback=lambda m, lv: self._after_call(lambda: self._log_line(lv.upper() if lv != "info" else "INFO", m))
             )
 
             elapsed = time.time() - t0

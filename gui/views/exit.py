@@ -136,6 +136,8 @@ class ExitView(ctk.CTkFrame):
             "¿Deseas eyectar el pendrive virtual y borrar todas las evidencias locales antes de salir?",
             icon='warning'
         ):
+            import logging
+            logging.shutdown()
             self._perform_eject()
             self._perform_delete()
             self._perform_quit()

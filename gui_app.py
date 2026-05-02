@@ -26,7 +26,7 @@ class App(ctk.CTk):
         ("🔍", "Auditoría",     "audit"),
         ("📊", "Resultados",    "results"),
         ("📁", "Reportes",      "reports"),
-        ("📤", "Post-Audit",    "post_audit"),
+        ("📤", "Exfiltración",    "post_audit"),
         ("🔧", "Mantenimiento", "maintenance"),
         ("🔨", "Builder",       "builder"),
         ("🚪", "Salir",         "exit"),
@@ -46,6 +46,10 @@ class App(ctk.CTk):
 
         self._current_view_key: str | None = None
         self._audit_dir = Path(".audit")
+        
+        # Initialize environment and logging
+        from main import _setup_environment
+        _setup_environment(str(self._audit_dir))
 
         self._build_sidebar()
         self._build_main_container()

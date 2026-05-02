@@ -44,6 +44,10 @@ COLORS = {
     # Borders
     "border":        "#252840",
     "border_focus":  "#4f8ef7",
+
+    # Terminal Look
+    "bg_terminal":   "#0a0b11",
+    "text_terminal": "#33ff33",
 }
 
 # ─── Typography ─────────────────────────────────────────────────────────────

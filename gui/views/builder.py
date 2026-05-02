@@ -307,21 +307,23 @@ class BuilderView(ctk.CTkScrollableFrame):
 
         self._log = ctk.CTkTextbox(
             log_card,
-            fg_color=COLORS["bg_input"],
-            text_color=COLORS["text_primary"],
+            fg_color=COLORS["bg_terminal"],
+            text_color=COLORS["text_terminal"],
             font=FONTS["code"],
             corner_radius=8,
-            border_width=0,
-            height=280, # Fixed height to avoid scroll-ception
+            border_width=1,
+            border_color=COLORS["border"],
+            height=350, # Increased height for better visibility
             state="disabled",
         )
         self._log.pack(fill="x", padx=PAD["sm"], pady=PAD["sm"])
         self._log._textbox.tag_configure("OK",   foreground=COLORS["success"])
         self._log._textbox.tag_configure("ERR",  foreground=COLORS["danger"])
-        self._log._textbox.tag_configure("INFO", foreground=COLORS["text_primary"])
-        self._log._textbox.tag_configure("MUTED",foreground=COLORS["text_muted"])
+        self._log._textbox.tag_configure("INFO", foreground=COLORS["info"])
+        self._log._textbox.tag_configure("SYSTEM",  foreground=COLORS["accent"])
+        self._log._textbox.tag_configure("TIMESTAMP", foreground=COLORS["text_muted"])
 
-        self._log_line("MUTED", "Configurá las opciones y presioná BUILD para compilar el ejecutable.")
+        self._log_line("TIMESTAMP", "Configurá las opciones y presioná BUILD para compilar el ejecutable.")
         self._apply_preset("Google")
 
     # ── Helpers ───────────────────────────────────────────────────────────────
@@ -356,7 +358,7 @@ class BuilderView(ctk.CTkScrollableFrame):
         from datetime import datetime
         ts = datetime.now().strftime("%H:%M:%S")
         self._log.configure(state="normal")
-        self._log._textbox.insert("end", f"[{ts}] ", "MUTED")
+        self._log._textbox.insert("end", f"[{ts}] ", "TIMESTAMP")
         self._log._textbox.insert("end", msg + "\n", tag)
         self._log._textbox.see("end")
         self._log.configure(state="disabled")

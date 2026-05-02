@@ -109,12 +109,14 @@ class ReportsView(ctk.CTkFrame):
 
         self._preview_box = ctk.CTkTextbox(
             preview_card,
-            fg_color=COLORS["bg_input"],
-            text_color=COLORS["text_primary"],
+            fg_color=COLORS["bg_terminal"],
+            text_color=COLORS["text_terminal"],
             font=FONTS["mono_sm"],
             corner_radius=8,
-            border_width=0,
+            border_width=1,
+            border_color=COLORS["border"],
             state="disabled",
+            wrap="none" # Better for CSV/Log data
         )
         self._preview_box.pack(fill="both", expand=True, padx=PAD["sm"], pady=PAD["sm"])
 

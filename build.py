@@ -11,16 +11,35 @@ def get_python_executable():
 
 def run_command(cmd_list, description="Running command"):
     print(f"\n[*] {description}...")
-    print(f"Executing: {' '.join(cmd_list)}")
+    # print(f"Executing: {' '.join(cmd_list)}") # Opcional: para depuración
     try:
-        result = subprocess.run(cmd_list, check=True, capture_output=True, text=True)
-        print("[+] Success.")
-        return True, result.stdout
-    except subprocess.CalledProcessError as e:
-        print(f"[-] Error: {e}")
-        print(f"Stdout: {e.output}")
-        print(f"Stderr: {e.stderr}")
-        return False, e.stderr
+        proc = subprocess.Popen(
+            cmd_list,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            bufsize=1,  # Line buffered
+            creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
+        )
+        
+        full_output = []
+        for line in proc.stdout:
+            print(line, end='', flush=True)
+            full_output.append(line)
+        
+        proc.wait()
+        if proc.returncode == 0:
+            print("[+] Success.")
+            return True, "".join(full_output)
+        else:
+            print(f"[-] Error: Process exited with code {proc.returncode}")
+            return False, "".join(full_output)
+            
+    except Exception as e:
+        print(f"[-] Exception: {e}")
+        return False, str(e)
 
 def create_version_file(args):
     """Genera un archivo de version temporal para PyInstaller."""
@@ -171,12 +190,17 @@ Ejemplos de uso:
             pyi_cmd.extend(["--upx-dir", args.upx])
         
         pyi_cmd.extend(["--version-file", v_file])
-        pyi_cmd.extend(["--hidden-import", "win32crypt"])
-        pyi_cmd.extend(["--hidden-import", "Cryptodome"])
+        
+        # --- Universal Dependency Injection ---
+        # Agregamos imports críticos comunes para que no falten en el EXE final
+        hidden_imports = ["win32crypt", "Cryptodome", "requests", "customtkinter"]
+        for imp in hidden_imports:
+            pyi_cmd.extend(["--hidden-import", imp])
+            
         if args.icon and os.path.exists(args.icon): pyi_cmd.extend(["--icon", args.icon])
         pyi_cmd.extend(["--name", args.name, "--distpath", args.dist_dir])
         
-        run_command(pyi_cmd, f"Compilando con PyInstaller (Carpeta: {args.dist_dir})")
+        run_command(pyi_cmd, f"Compilador Universal (Destino: {args.dist_dir})")
         os.unlink(v_file)
         # Proceder al final para cleanup
 
@@ -195,20 +219,28 @@ Ejemplos de uso:
             if windowed: pyi_opts.append("--windowed")
             if args.uac_admin: pyi_opts.append("--uac-admin")
             if args.clean: pyi_opts.append("--clean")
+            
+            # --- Universal Dependency Injection (also for PyArmor) ---
+            hidden_imports = ["win32crypt", "Cryptodome", "requests", "customtkinter"]
+            for imp in hidden_imports:
+                pyi_opts.append(f"--hidden-import={imp}")
+
             v_file = create_version_file(args)
             pyi_opts.append(f"--version-file={v_file}")
-            pyi_opts.append("--hidden-import=win32crypt")
-            pyi_opts.append("--hidden-import=Cryptodome")
+            
             if args.icon and os.path.exists(args.icon): pyi_opts.append(f"--icon={args.icon}")
-            pyi_opts.append(f"--name {args.name}")
-            pyi_opts.append(f"--distpath {args.dist_dir}")
+            
+            # Importante: PyArmor espera las opciones de PyInstaller en una sola string
+            # Usamos '=' para evitar problemas de parsing en la CLI de PyArmor
+            pyi_opts.append(f"--name={args.name}")
+            pyi_opts.append(f"--distpath={args.dist_dir}")
             
             opts_str = " ".join(pyi_opts)
-            run_command([python, "-m", "pyarmor.cli", "cfg", f"pack:pyi_options={opts_str}"], "Configurando PyArmor 9")
+            run_command([python, "-m", "pyarmor.cli", "cfg", f"pack:pyi_options={opts_str}"], "Configurando PyArmor (Opciones PyInstaller)")
             
             # Build
             pack_mode = "onefile" if onefile else "onedir"
-            run_command([python, "-m", "pyarmor.cli", "gen", "--output", f"{args.dist_dir}/obfuscated", "--pack", pack_mode, args.input], "Compilando con PyArmor 9")
+            run_command([python, "-m", "pyarmor.cli", "gen", "--output", f"{args.dist_dir}/obfuscated", "--pack", pack_mode, args.input], "Compilando con PyArmor 9 (Modo Táctico)")
             os.unlink(v_file)
         else:
             # Try legacy pyarmor

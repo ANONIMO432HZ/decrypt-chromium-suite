@@ -11,6 +11,7 @@ System health panel:
 import subprocess
 import sys
 import threading
+import shutil
 from pathlib import Path
 import customtkinter as ctk
 
@@ -169,13 +170,29 @@ class MaintenanceView(ctk.CTkFrame):
                 ("PyInstaller",        "pyinstaller"),
                 ("pyarmor",            "pyarmor"),
             ]
-            self._missing_deps = []
             for mod, pkg in DEPS:
-                try:
-                    importlib.import_module(mod)
-                    ok = True
-                except ImportError:
-                    ok = False
+                ok = False
+                # Especial handling for CLI tools when frozen
+                if pkg in ["pyinstaller", "pyarmor"]:
+                    # Check if the command exists in PATH
+                    if shutil.which(pkg) or shutil.which(f"{pkg}.exe"):
+                        ok = True
+                    else:
+                        # Fallback to module check
+                        try:
+                            importlib.import_module(mod)
+                            ok = True
+                        except ImportError:
+                            ok = False
+                else:
+                    # Standard module check
+                    try:
+                        importlib.import_module(mod)
+                        ok = True
+                    except ImportError:
+                        ok = False
+                
+                if not ok:
                     self._missing_deps.append(pkg)
                 
                 badge = self._dep_badges.get(mod)
@@ -197,6 +214,15 @@ class MaintenanceView(ctk.CTkFrame):
     def _install_missing(self):
         if not self._missing_deps: return
         
+        # Check if frozen (EXE mode)
+        if getattr(sys, 'frozen', False):
+            from tkinter import messagebox
+            messagebox.showwarning("Modo Congelado", 
+                "Estás ejecutando la versión compilada (.exe).\n\n"
+                "Para instalar dependencias faltantes, debés hacerlo manualmente en tu sistema "
+                "usando: pip install " + " ".join(self._missing_deps))
+            return
+
         def _do():
             self._repair_btn.configure(state="disabled", text="🔨 Instalando…")
             self.after(0, lambda: self._log_dep("--- Iniciando reparación ---", clear=True))
@@ -210,7 +236,8 @@ class MaintenanceView(ctk.CTkFrame):
                         stderr=subprocess.STDOUT,
                         text=True,
                         encoding="utf-8",
-                        errors="replace"
+                        errors="replace",
+                        creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
                     )
                     for line in proc.stdout:
                         line = line.strip()
@@ -438,9 +465,22 @@ class MaintenanceView(ctk.CTkFrame):
             self._log_box.insert("end", line, "INFO")
 
     def _clear_log_file(self):
+        from main import shutdown_logging, _setup_environment
         log_path = self._get_log_path()
-        try: log_path.write_text("", encoding="utf-8")
-        except Exception: pass
+        try: 
+            # 1. Soltar el archivo (Cerrar handlers de logging)
+            shutdown_logging()
+            
+            # 2. Eliminar el archivo físicamente
+            if log_path.exists():
+                log_path.unlink()
+            
+            # 3. Re-inicializar entorno pasivo (sin re-abrir el log)
+            _setup_environment(str(self._audit_dir or ".audit"), start_logging=False)
+            
+            self._load_log(clear=True)
+        except Exception as e:
+            print(f"Error al limpiar log: {e}")
 
     def _copy_log(self):
         self._log_box.configure(state="normal")

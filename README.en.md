@@ -33,16 +33,13 @@
 <div align="center">
   <img src="screenshots/exit_self-destroy.png" width="600" alt="ChromiumSpecter Panic Exit">
 </div>
-* **🚀 Smart Exfiltration**:
-  * **Auto-Exfiltrate**: Immediate automatic upload configuration after audit.
-  * **Multi-Channel**: Native support for **Telegram Bots** and **Discord Webhooks** with redundancy.
-  * **Local Persistence**: Secure saving of exfiltration settings for recurring use.
+### 🚀 Smart Exfiltration
 
-<div align="center">
-  <img src="screenshots/mantemiento.png" width="800" alt="ChromiumSpecter Maintenance">
-</div>
+**Auto-Exfiltrate**: Immediate automatic upload configuration after audit.
+**Multi-Channel**: Native support for **Telegram Bots** and **Discord Webhooks** with redundancy.
+**Local Persistence**: Secure saving of exfiltration settings for recurring use.
 
-**🛠️ Integrated Visual Builder**:
+### 🛠️ Integrated Visual Builder
 
 * Generation of custom stubs with **Dynamic Injection** of parameters.
 * **Metadata Spoofing**: Integrated presets to clone signatures.

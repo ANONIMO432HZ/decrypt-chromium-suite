@@ -216,34 +216,47 @@ Ejemplos de uso:
             print("[+] PyArmor 8+ detectado.")
             onefile = not args.multi_file
             windowed = not args.show_console
-    
-            pyi_opts = []
-            if onefile: pyi_opts.append("--onefile")
-            if windowed: pyi_opts.append("--windowed")
-            if args.uac_admin: pyi_opts.append("--uac-admin")
-            if args.clean: pyi_opts.append("--clean")
-            
-            # --- Universal Dependency Injection (also for PyArmor) ---
-            hidden_imports = ["win32crypt", "Cryptodome", "requests", "customtkinter"]
-            for imp in hidden_imports:
-                pyi_opts.append(f"--hidden-import={imp}")
 
+            # --- Step 1: Obfuscate only (no --pack) ---
+            obf_dir = os.path.join(args.dist_dir, "obfuscated_src")
+            ok, _ = run_command(
+                [python, "-m", "pyarmor.cli", "gen", "--output", obf_dir, args.input],
+                "Ofuscando script con PyArmor 9"
+            )
+            if not ok:
+                print("[-] Error en la ofuscación. Abortando.")
+                return
+
+            # PyArmor puts the obfuscated script + runtime in obf_dir
+            obf_script = os.path.join(obf_dir, os.path.basename(args.input))
+            if not os.path.exists(obf_script):
+                print(f"[-] No se encontró el script ofuscado en: {obf_script}")
+                return
+
+            # --- Step 2: Run PyInstaller directly on the obfuscated output ---
             v_file = create_version_file(args)
-            pyi_opts.append(f"--version-file={v_file}")
-            
-            if args.icon and os.path.exists(args.icon): pyi_opts.append(f"--icon={args.icon}")
-            
-            # Importante: PyArmor espera las opciones de PyInstaller en una sola string
-            # Usamos '=' para evitar problemas de parsing en la CLI de PyArmor
-            pyi_opts.append(f"--name={args.name}")
-            pyi_opts.append(f"--distpath={args.dist_dir}")
-            
-            opts_str = " ".join(pyi_opts)
-            run_command([python, "-m", "pyarmor.cli", "cfg", f"pack:pyi_options={opts_str}"], "Configurando PyArmor (Opciones PyInstaller)")
-            
-            # Build
-            pack_mode = "onefile" if onefile else "onedir"
-            run_command([python, "-m", "pyarmor.cli", "gen", "--output", f"{args.dist_dir}/obfuscated", "--pack", pack_mode, args.input], "Compilando con PyArmor 9 (Modo Táctico)")
+            hidden_imports = ["win32crypt", "Cryptodome", "requests", "customtkinter"]
+
+            pyi_cmd = [python, "-m", "PyInstaller", obf_script]
+            pyi_cmd += ["--name", args.name]
+            pyi_cmd += ["--distpath", args.dist_dir]
+            # PyArmor runtime hook is in obf_dir
+            pyi_cmd += ["--additional-hooks-dir", obf_dir]
+            pyi_cmd += ["--version-file", v_file]
+
+            if onefile:   pyi_cmd.append("--onefile")
+            if windowed:  pyi_cmd.append("--windowed")
+            if args.uac_admin: pyi_cmd.append("--uac-admin")
+            if args.clean:     pyi_cmd.append("--clean")
+            if args.upx and os.path.exists(args.upx):
+                pyi_cmd += ["--upx-dir", args.upx]
+            if args.icon and os.path.exists(args.icon):
+                pyi_cmd += ["--icon", args.icon]
+
+            for imp in hidden_imports:
+                pyi_cmd += ["--hidden-import", imp]
+
+            run_command(pyi_cmd, f"Compilando con PyInstaller (nombre: {args.name})")
             os.unlink(v_file)
         else:
             # Try legacy pyarmor

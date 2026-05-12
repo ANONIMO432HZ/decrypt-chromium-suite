@@ -1,6 +1,8 @@
 import os
 import sys
 import threading
+import subprocess
+import multiprocessing
 import tkinter as tk
 from pathlib import Path
 from typing import Any
@@ -169,12 +171,52 @@ class App(ctk.CTk):
 
 
 if __name__ == "__main__":
-    # Si se pasan argumentos (ej. desde el Builder interno), actuar como proxy de build.py
-    if len(sys.argv) > 1 and sys.argv[1].endswith("build.py"):
-        import build
-        # Quitar el script proxy de los args para que argparse no se rompa
-        sys.argv.pop(1)
-        build.main()
-    else:
-        app = App()
-        app.mainloop()
+    # Mandatory for PyInstaller + Multiprocessing
+    multiprocessing.freeze_support()
+
+    # Proxy Logic: If called with args, act as a Python interpreter replacement
+    if len(sys.argv) > 1:
+        arg1 = sys.argv[1].lower()
+        
+        # Case A: Running build.py proxy
+        if arg1.endswith("build.py"):
+            import build
+            sys.argv.pop(1)
+            build.main()
+            sys.exit(0)
+            
+        # Case B: Running a module (-m PyInstaller, -m pyarmor)
+        elif arg1 == "-m" and len(sys.argv) > 2:
+            module_name = sys.argv[2]
+            # Remove '-m', 'module' and keep rest of args
+            del sys.argv[1:3]
+            
+            try:
+                if module_name.lower() == "pyinstaller":
+                    import PyInstaller.__main__
+                    PyInstaller.__main__.run()
+                elif module_name.lower().startswith("pyarmor"):
+                    # Robust dynamic import for PyArmor 8+ and Legacy
+                    import importlib
+                    try:
+                        module = importlib.import_module("pyarmor.cli.__main__")
+                        pyarmor_main = module.main
+                    except ImportError:
+                        try:
+                            module = importlib.import_module("pyarmor.__main__")
+                            pyarmor_main = module.main
+                        except ImportError:
+                            print("[-] Error: PyArmor entry point not found.")
+                            sys.exit(1)
+                    pyarmor_main()
+                else:
+                    print(f"[-] Error: Module proxy for '{module_name}' not implemented.")
+                    sys.exit(1)
+            except Exception as e:
+                print(f"[-] Proxy Execution Error ({module_name}): {e}")
+                sys.exit(1)
+            sys.exit(0)
+
+    # Standard Case: Open GUI
+    app = App()
+    app.mainloop()

@@ -199,4 +199,22 @@ Si el error persiste específicamente con `PIL` (Pillow), reinstalalo manualment
 ```powershell
 pip install --force-reinstall Pillow
 ```
+---
 
+## 12. Chrome muestra "Sin Descifrar" (App-Bound Encryption v20)
+
+### Síntoma
+En versiones recientes de Chrome (127+), todas las contraseñas aparecen como `[Sin Descifrar]`, mientras que en otros navegadores como Edge o Brave (si no están actualizados) se ven correctamente.
+
+### Causa
+A partir de **Chrome 127** (Julio 2024), Google introdujo **App-Bound Encryption**. Las contraseñas ahora usan el prefijo **`v20`** en lugar del clásico `v10`.
+- **v10/v11**: Usa una llave AES cifrada con DPAPI. Cualquier proceso del usuario puede pedirle a Windows que la descifre.
+- **v20**: La llave está vinculada a la identidad del ejecutable `chrome.exe`. Google usa un servicio de Windows (`Chrome Elevation Service`) que verifica que quien pide descifrar sea el navegador legítimo.
+
+### Cómo verificar tu versión
+1. En Chrome, andá a `chrome://version`.
+2. Si la versión es **127.x** o superior, es casi seguro que estás usando `v20`.
+3. Podés verificar los blobs directamente en la base de datos: si empiezan con los bytes `76 32 30` (ASCII: `v20`), es el nuevo cifrado.
+
+### Solución
+Actualmente, el descifrado de `v20` desde procesos externos es extremadamente complejo ya que requiere inyección de código en el proceso de Chrome o interactuar con el servicio de elevación bajo condiciones específicas. La suite detecta estos blobs pero no puede descifrarlos por limitaciones impuestas por el Sistema Operativo y la identidad del proceso.

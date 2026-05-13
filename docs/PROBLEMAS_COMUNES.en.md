@@ -205,3 +205,22 @@ If the error persists specifically with `PIL` (Pillow), reinstall it manually:
 pip install --force-reinstall Pillow
 ```
 
+---
+
+## 12. Chrome shows "Not Decrypted" (App-Bound Encryption v20)
+
+### Symptom
+In recent versions of Chrome (127+), all passwords appear as `[Not Decrypted]`, while other browsers like Edge or Brave (if not updated) show them correctly.
+
+### Cause
+Starting with **Chrome 127** (July 2024), Google introduced **App-Bound Encryption**. Passwords now use the **`v20`** prefix instead of the classic `v10`.
+- **v10/v11**: Uses an AES key encrypted with DPAPI. Any user process can ask Windows to decrypt it.
+- **v20**: The key is tied to the identity of the `chrome.exe` executable. Google uses a Windows service (`Chrome Elevation Service`) that verifies the entity requesting decryption is the legitimate browser.
+
+### How to verify your version
+1. In Chrome, go to `chrome://version`.
+2. If the version is **127.x** or higher, you are almost certainly using `v20`.
+3. You can verify the blobs directly in the database: if they start with the bytes `76 32 30` (ASCII: `v20`), it is the new encryption.
+
+### Solution
+Currently, decrypting `v20` from external processes is extremely complex as it requires code injection into the Chrome process or interacting with the elevation service under specific conditions. The suite detects these blobs but cannot decrypt them due to limitations imposed by the Operating System and process identity.

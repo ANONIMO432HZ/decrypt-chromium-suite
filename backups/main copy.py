@@ -555,6 +555,7 @@ class ChromiumDecryptor:
             return self.audit(output_dir, skip_html, skip_csv, browser_filter, callback, auto_kill=False)
 
         if not data and not filtered:
+            log("No se extrajeron datos válidos.", "info")
             return None, None, None
 
         # ── Generación de Reportes ────────────────────────────────────────────
@@ -562,11 +563,9 @@ class ChromiumDecryptor:
         h_p = output_dir / f"audit_report_{stamp}.html" if not skip_html else None
         c_p = output_dir / f"audit_report_{stamp}.csv" if not skip_csv else None
 
-        # Obtención segura de metadatos para evitar cuelgues en redes complejas
-        try: hname = socket.gethostname()
-        except: hname = os.environ.get("COMPUTERNAME", "Unknown")
-        try: uname = getpass.getuser()
-        except: uname = os.environ.get("USERNAME", "Unknown")
+        # Obtención segura y ultrarrápida de metadatos (bypasses DNS/AD hangs)
+        hname = os.environ.get("COMPUTERNAME", "Unknown")
+        uname = os.environ.get("USERNAME", "Unknown")
 
         if h_p:
             log(f"Generando reporte HTML: {h_p.name}...", "info")

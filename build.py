@@ -359,5 +359,15 @@ def cleanup_artifacts(args):
         except Exception as e:
             print(f"  [!] No se pudo eliminar carpeta 'build/': {e}")
 
+    # 3. Eliminar carpeta de fuentes ofuscadas (es temporal)
+    obf_dir = os.path.join(args.dist_dir, "obfuscated_src")
+    if os.path.exists(obf_dir):
+        import shutil
+        try:
+            shutil.rmtree(obf_dir)
+            print(f"  [+] Carpeta temporal de ofuscación eliminada: {obf_dir}")
+        except Exception as e:
+            print(f"  [!] No se pudo eliminar {obf_dir}: {e}")
+
 if __name__ == "__main__":
     main()

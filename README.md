@@ -1,4 +1,4 @@
-# 🛡️ ChromiumSpecter Auditor Suite
+# 🛡️ ChromiumSpecter Auditor Suite `v2.0.0` (V20 Update)
 
 > [!NOTE]
 > [English Version](README.en.md) | **Versión en Español**
@@ -32,9 +32,10 @@
 ### 🌟 Características Destacadas
 
 * **🖥️ Dashboard de Alta Densidad**: Interfaz gráfica profesional con consolas en tiempo real, estadísticas dinámicas y gestión de resultados.
-* **🔐 Motor de Descifrado de Nueva Generación (v20 Support)**:
-  * Soporte total para **Chrome v127+ (App-Bound Encryption)** mediante el nuevo módulo `v20_decryptor`.
-  * Descifrado híbrido: Soporta **AES-GCM (v10/v11)**, **DPAPI Legacy** y el nuevo esquema **v20** en la misma base de datos.
+* **🔐 Next-Gen Decryption Engine (v20 Support) `v2.0.0`**:
+  * Full support for **Chrome v127+ (App-Bound Encryption)** via the new `v20_decryptor` module.
+  * Hybrid Decryption: Supports **AES-GCM (v10/v11)**, **DPAPI Legacy**, and the new **v20** scheme in the same database.
+  * **Intelligent Synchronization**: The engine now uses dynamic imports to survive obfuscators and ensure portability.
   * **Escalada de Privilegios**: Implementa impersonación nativa de SYSTEM (vía `winlogon.exe`) para extraer llaves protegidas por el sistema. **(Requiere ejecutar como Administrador)**.
   * Detección inteligente: El motor identifica el prefijo (`v10`, `v11`, `v20`) y aplica el algoritmo correspondiente con fallback automático.
 * **🕵️ Motor de Sigilo (Tactical Stealth)**:
@@ -57,9 +58,10 @@
 * **Multi-Canal**: Soporte nativo para **Telegram Bots** y **Discord Webhooks** con redundancia.
 * **Persistencia Local**: Guardado seguro de configuraciones de exfiltración para uso recurrente.
 
-### 🛠️ Builder Visual Integrado
+### 🛠️ Builder Visual Integrado `v2.0.0`
 
 Generación de stubs personalizados con **Inyección Dinámica** de parámetros.
+**Universal Dependency Injection**: El builder ahora parsea automáticamente `requirements.txt` y resuelve dependencias en tiempo de compilación.
 **Spoofing de Metadatos**: Presets integrados para clonar firmas.
 **Compresión y Ofuscación**: Soporte nativo para UPX y PyArmor.
 

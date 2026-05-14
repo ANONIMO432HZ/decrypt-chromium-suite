@@ -90,8 +90,8 @@ def get_dynamic_imports():
         "pillow": "PIL",
         "pyinstaller": "PyInstaller"
     }
-    # Dependencias core necesarias para el Builder autónomo que quizás no se importen directamente
-    hidden = ["pyarmor.cli"] 
+    # Dependencias core necesarias para el Builder autónomo y módulos internos dinámicos
+    hidden = ["pyarmor.cli", "modules.chrome_v20_decryption.v20_decryptor"] 
     try:
         if os.path.exists("requirements.txt"):
             with open("requirements.txt", "r", encoding="utf-8") as f:
@@ -151,7 +151,7 @@ Ejemplos de uso:
                             help="Aplica un perfil de metadatos predefinido para rapidez.")
     meta_group.add_argument("--company", help="Nombre de la empresa (ej: Microsoft).")
     meta_group.add_argument("--desc", help="Descripción del archivo.")
-    meta_group.add_argument("--version", default="1.2.0.0", help="Versión del archivo (ej: 1.0.0.0).")
+    meta_group.add_argument("--version", default="2.5.0.0", help="Versión del archivo (ej: 1.0.0.0).")
     meta_group.add_argument("--copyright", help="Copyright legal.")
     meta_group.add_argument("--product", help="Nombre del producto.")
     

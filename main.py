@@ -314,9 +314,8 @@ class ChromiumDecryptor:
                 logger.warning("!!! DETECTADA LLAVE V20 (Chrome 127+). REQUIERE EJECUTAR COMO ADMINISTRADOR PARA DESCIFRAR !!!")
 
             try:
-                import importlib
-                v20_module = importlib.import_module('modules.chrome_v20_decryption.v20_decryptor')
-                aes_key = v20_module.get_v20_key(app_bound_b64, win32crypt)
+                from modules.chrome_v20_decryption import v20_decryptor
+                aes_key = v20_decryptor.get_v20_key(app_bound_b64, win32crypt)
                 if aes_key:
                     logger.debug(f"Master key AES (v20) obtenida ({len(aes_key)} bytes) para: {user_data_path}")
                     return aes_key, True

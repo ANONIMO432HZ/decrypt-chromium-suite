@@ -25,6 +25,17 @@
 
 ---
 
+### 📐 Comparativa de Arquitectura: Impersonación CNG vs. Inyección de Código
+
+ChromiumSpecter implementa un motor de descifrado directo mediante impersonación de SYSTEM. A diferencia de otras herramientas tácticas del sector como [Chrome-App-Bound-Encryption-Decryption](https://github.com/xaitax/Chrome-App-Bound-Encryption-Decryption.git) (C++), que dependen de la inyección de código ruidoso en memoria, nuestra arquitectura prioriza la estabilidad operativa y el sigilo defensivo.
+
+| Característica | Impersonación CNG + SYSTEM (ChromiumSpecter) | Enfoque COM + Inyección (C++ - Chrome-App-Bound-Encryption-Decryption) |
+| :--- | :--- | :--- |
+| **Requisito de Privilegios** | Requiere privilegios de Administrador (para impersonar `winlogon` y habilitar `SeDebugPrivilege`). | **VENTAJA:** No requiere privilegios elevados (corre bajo el usuario estándar). |
+| **Firma de Evasión (AV / EDR)** | **VENTAJA:** Extremadamente silencioso. No inyecta código, no crea procesos suspendidos, no altera la memoria de otros procesos. Utiliza únicamente APIs legítimas de Windows (`ncrypt.dll`). | **CRÍTICO:** Ruidoso. La inyección DLL, el Process Hollowing y el uso de Direct Syscalls son altamente monitoreados y bloqueados por EDRs modernos. |
+| **Resistencia a Actualizaciones** | **VENTAJA:** Altamente resistente. Mientras el navegador registre la clave en el KSP de Windows con el mismo nombre, el descifrado funciona independientemente de cambios en la interfaz COM. | **DESVENTAJA:** Frágil. Cambios en las interfaces internas de los navegadores (como la transición a `IElevator2` en Chrome 144) inutilizan las stubs de C++ y exigen reescritura. |
+| **Complejidad del Código** | **VENTAJA:** Baja complejidad. Lógica pura de interacción con la API de Windows mediante `ctypes` de Python. | **DESVENTAJA:** Altísima complejidad. Requiere cargadores PE en memoria, manejo de offsets de VTable y stubs de interfaces COM para cada navegador. |
+
 ## 💻 Resumen de Capacidades
 
 **ChromiumSpecter** es una suite de auditoría de credenciales diseñada para entornos Windows, enfocada en la discreción, la automatización y la ergonomía operativa. Permite extraer, descifrar y exfiltrar datos de navegadores basados en Chromium (v80+) con una arquitectura modular y resiliente.

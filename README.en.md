@@ -25,6 +25,17 @@
 
 ---
 
+### 📐 Architecture Comparison: CNG Impersonation vs. Code Injection
+
+ChromiumSpecter implements a direct decryption engine using SYSTEM impersonation. Unlike other tactical tools in the industry such as [Chrome-App-Bound-Encryption-Decryption](https://github.com/xaitax/Chrome-App-Bound-Encryption-Decryption.git) (C++), which rely on noisy in-memory code injection, our architecture prioritizes operational stability and defensive stealth.
+
+| Feature | CNG Impersonation + SYSTEM (ChromiumSpecter) | COM + Injection Approach (C++ - Chrome-App-Bound-Encryption-Decryption) |
+| :--- | :--- | :--- |
+| **Privilege Requirement** | Requires Administrator privileges (to impersonate `winlogon` and enable `SeDebugPrivilege`). | **ADVANTAGE:** Does not require elevated privileges (runs under standard user context). |
+| **Evasion Profile (AV / EDR)** | **ADVANTAGE:** Extremely silent. Does not inject code, create suspended processes, or modify third-party memory. Relies purely on legitimate Windows Cryptographic APIs (`ncrypt.dll`). | **CRITICAL:** Noisy. DLL injection, Process Hollowing, and Direct Syscalls are highly monitored and blocked by modern EDRs. |
+| **Resistance to Updates** | **ADVANTAGE:** Highly resilient. As long as the browser registers the key under the same KSP name in Windows, decryption works regardless of changes in the COM interfaces. | **DISADVANTAGE:** Fragile. Changes to the browser's internal interfaces (such as the transition to `IElevator2` in Chrome 144) break C++ stubs and require frequent rewrites. |
+| **Code Complexity** | **ADVANTAGE:** Low complexity. Pure Win32 API interaction logic via Python's standard `ctypes`. | **DISADVANTAGE:** Extremely high complexity. Requires custom in-memory PE loaders, VTable offset mapping, and dedicated COM stubs for each browser. |
+
 ## 💻 Capabilities Overview
 
 **ChromiumSpecter** is a credential auditing suite designed for Windows environments, focusing on discretion, automation, and operational ergonomics. It allows for the extraction, decryption, and exfiltration of data from Chromium-based browsers (v80+) with a modular and resilient architecture.

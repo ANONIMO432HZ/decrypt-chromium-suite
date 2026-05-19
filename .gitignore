@@ -34,3 +34,6 @@ scratch/
 .idea/
 *.swp
 *.swo
+
+# Agent Teams Lite
+.atl/
